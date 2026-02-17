@@ -12,7 +12,7 @@ BeamNG modding community
 
 bhowiebkr Jbeam to Json parser https://github.com/bhowiebkr
 
-FakeCarGuy Cummins engine mod (BeamNG)
+FakeCarGuy Cummins engine mod https://www.beamng.com/resources/authors/fakecarguy.370181/
 
 
 ## What this project does
