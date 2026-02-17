@@ -7,6 +7,7 @@ It is currently in alpha: core workflows run and it might produce working swaps,
 Development documentation for each module is included for those who would like to expand on this work, forgive the disorginization (see DEV-README.md)
 
 ## Credits to 
+
 BeamNG modding community
 
 bhowiebkr Jbeam to Json parser https://github.com/bhowiebkr
