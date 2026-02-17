@@ -1,0 +1,8 @@
+# local development documentation / notes
+DrivetrainReports/**
+!DrivetrainReports/.gitignore
+archive/
+GrokDoc_changelogs/
+Reference_Material/
+temporary-docs/
+*_release_handoff_checklist.md

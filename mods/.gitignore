@@ -1,0 +1,4 @@
+# Local donor and generated mods workspace (ignored in git).
+*
+!.gitignore
+!unpacked/

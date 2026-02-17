@@ -1,0 +1,61 @@
+{
+  "$schema": "./schemas/swap_parameters.schema.json",
+  "version": "1.0",
+  "description": "Test configuration - expand engine mounts to clear interference",
+  
+  "mod_name": "engineswaps",
+  "base_output_path": "M:\\BeamNG_Modding_Temp",
+  "base_vehicles_path": "M:\\BeamNG_Modding_Temp\\SteamLibrary_content_vehicles",
+  
+  "target_engine_file": "pickup_engine_v8_5.5.jbeam",
+  
+  "solver_options": {
+    "swpparam_FixMeshOffset": false,
+    "swpparam_ShrinkOrExpand": "expand_engine_mounts",
+    "swpparam_ForeAftOffset": 0.0,
+    "swpparam_UpDownOffset": 0.06,
+    "swpparam_LeftRightOffset": 0.0
+  },
+  
+  "limits": {
+    "max_shrink_percent": 15,
+    "max_mount_expansion_m": 0.15,
+    "min_mount_clearance_m": 0.02
+  },
+  
+  "output": {
+    "format": "embedded",
+    "generate_debug_visualization": false
+  },
+  
+  "transmissions_to_adapt": "single",
+  "transfercase_to_adapt": "auto",
+  "discard_aux_transfercase": true,
+
+  "extra_assets": {
+    "powertrain_lua": {
+      "enabled": true,
+      "description": "Copy lua/powertrain/*.lua files from donor mod"
+    },
+    "actuator_lua": {
+      "enabled": true,
+      "description": "Copy lua/controller/drivingDynamics/actuators/*.lua files from donor mod"
+    },
+    "materials_json": {
+      "enabled": true,
+      "description": "Copy *.materials.json files matching mesh prefixes"
+    }
+  },
+
+  "powertrain_tweaks": {
+    "enabled": true,
+    "engine": {
+      "requiredEnergyType": "gasoline",
+      "fix_turbo_transient": 1
+    },
+    "transmission": {
+        "tighter_tc_stall": 0.2,
+        "modern_tcc_lockup": 2
+    }
+  }
+}

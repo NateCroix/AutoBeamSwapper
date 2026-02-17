@@ -1,0 +1,254 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Engine Swap Parameters Schema",
+  "description": "Schema for engine swap positioning and adjustment parameters. The TMS (Transplant Mounting Solver) uses these parameters to position donor engines within target vehicles while preserving BeamNG property modifier conventions.",
+  "type": "object",
+  "required": ["version", "base_output_path", "solver_options", "limits", "output"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "JSON Schema reference"
+    },
+    "version": {
+      "type": "string",
+      "description": "Schema version",
+      "pattern": "^[0-9]+\\.[0-9]+$"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable configuration description"
+    },
+    "mod_name": {
+      "type": "string",
+      "description": "Name of the mod package folder (default: 'engineswaps'). Output path will be {base_output_path}/mods/unpacked/{mod_name}/vehicles/{target}",
+      "default": "engineswaps",
+      "pattern": "^[a-zA-Z0-9_-]+$"
+    },
+    "base_output_path": {
+      "type": "string",
+      "description": "Base directory path for mod output (e.g., 'M:\\\\BeamNG_Modding_Temp'). Full path will be {base_output_path}/mods/unpacked/{mod_name}/vehicles/{target_vehicle}"
+    },
+    "solver_options": {
+      "type": "object",
+      "description": "Engine positioning solver parameters",
+      "required": ["swpparam_FixMeshOffset", "swpparam_ShrinkOrExpand", "swpparam_ForeAftOffset", "swpparam_UpDownOffset", "swpparam_LeftRightOffset"],
+      "properties": {
+        "swpparam_FixMeshOffset": {
+          "type": "boolean",
+          "description": "Correct visual mesh position to align with translated physics nodes"
+        },
+        "swpparam_ShrinkOrExpand": {
+          "type": "string",
+          "enum": ["none", "shrink_engine_block", "expand_engine_mounts"],
+          "description": "Interference resolution strategy when mount nodes are inside engine bounding box"
+        },
+        "swpparam_ForeAftOffset": {
+          "type": "number",
+          "description": "Longitudinal offset in meters (+rearward, -forward)"
+        },
+        "swpparam_UpDownOffset": {
+          "type": "number",
+          "description": "Vertical offset in meters (+upward, -downward)"
+        },
+        "swpparam_LeftRightOffset": {
+          "type": "number",
+          "description": "Lateral offset in meters (+right, -left)"
+        }
+      }
+    },
+    "limits": {
+      "type": "object",
+      "description": "Physical constraints for automatic interference resolution",
+      "required": ["max_shrink_percent", "max_mount_expansion_m", "min_mount_clearance_m"],
+      "properties": {
+        "max_shrink_percent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 50,
+          "description": "Maximum engine cube shrinking percentage (default: 15)"
+        },
+        "max_mount_expansion_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5,
+          "description": "Maximum mount node outward movement in meters (default: 0.1)"
+        },
+        "min_mount_clearance_m": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Minimum required gap between mounts and engine cube (default: 0.02)"
+        }
+      }
+    },
+    "output": {
+      "type": "object",
+      "description": "Output file configuration",
+      "required": ["format", "generate_debug_visualization"],
+      "properties": {
+        "format": {
+          "type": "string",
+          "enum": ["embedded", "separate"],
+          "description": "Node output format: 'embedded' writes nodes into engine .jbeam (Cummins pattern), 'separate' creates engine_structure.jbeam file"
+        },
+        "generate_debug_visualization": {
+          "type": "boolean",
+          "description": "Generate visual debug markers in output for troubleshooting"
+        }
+      }
+    },
+    "slot_rules": {
+      "type": "object",
+      "description": "Slot handling rules for the slot graph system",
+      "properties": {
+        "prune_slots": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Slots to completely remove from adapted engine including child dependencies"
+        },
+        "preserve_slots": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Slots to keep unchanged in original donor namespace"
+        },
+        "force_adapt_slots": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Slots to force adapt to target vehicle namespace"
+        },
+        "inject_slots": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "New slots to inject that don't exist in donor files"
+        },
+        "replace_slots": {
+          "type": "object",
+          "patternProperties": {
+            ".*": {
+              "type": "string"
+            }
+          },
+          "description": "Slot replacement rules for SOURCE slot substitution"
+        }
+      }
+    },
+    "transmissions_to_adapt": {
+      "type": "string",
+      "enum": ["single", "all"],
+      "default": "all",
+      "description": "How many Camso donor transmissions to adapt. 'single' = only the default-referenced transmission. 'all' = all found Camso transmissions (current behavior)."
+    },
+    "transfercase_to_adapt": {
+      "type": "string",
+      "default": "auto",
+      "description": "Transfercase adaptation mode. 'auto' = select lowest-cost BeamNG match, '<part_name>' = specify a BeamNG TC part name for direct strategy lookup."
+    },
+    "extra_assets": {
+      "type": "object",
+      "description": "Configuration for extra assets not enumerated by slot graph (e.g., lua scripts, materials)",
+      "properties": {
+        "powertrain_lua": {
+          "type": "object",
+          "description": "Copy lua/powertrain/*.lua files from donor mod",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Enable copying powertrain lua files"
+            },
+            "description": {
+              "type": "string",
+              "description": "Human-readable description of this asset type"
+            }
+          }
+        },
+        "actuator_lua": {
+          "type": "object",
+          "description": "Copy lua/controller/drivingDynamics/actuators/*.lua files from donor mod (e.g., camso_advawd.lua)",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Enable copying actuator controller lua files"
+            },
+            "description": {
+              "type": "string",
+              "description": "Human-readable description of this asset type"
+            }
+          }
+        },
+        "materials_json": {
+          "type": "object",
+          "description": "Copy *.materials.json files matching mesh prefixes",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Enable copying materials.json files for meshes"
+            },
+            "description": {
+              "type": "string",
+              "description": "Human-readable description of this asset type"
+            }
+          }
+        }
+      }
+    },
+    "powertrain_tweaks": {
+      "type": "object",
+      "description": "Post-processing property tweaks applied to adapted powertrain components before final output. Each sub-object contains tweaks keyed by their registered config name.",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Master switch for powertrain tweaks. When false, no tweaks are applied regardless of sub-config."
+        },
+        "engine": {
+          "type": "object",
+          "description": "Tweaks applied to adapted engine jbeam data.",
+          "properties": {
+            "requiredEnergyType": {
+              "type": "string",
+              "enum": ["gasoline", "diesel", "compressedGas"],
+              "description": "Override the engine's fuel type. For diesel conversion, pair with convert_to_turbodiesel."
+            },
+            "fix_turbo_transient": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Turbo lag realism factor. 0.0 = Camso default, 0.5 = best guess at realisim, 1.0 = very laggy. Scales turbo inertia and pressureRatePSI."
+            },
+            "convert_to_turbodiesel": {
+              "type": "boolean",
+              "description": "Remodel turbo characteristics to mimic diesel behavior (no vacuum, altered boost profile). Forces requiredEnergyType to diesel."
+            }
+          }
+        },
+        "transmission": {
+          "type": "object",
+          "description": "Tweaks applied to adapted transmission jbeam data.",
+          "properties": {
+            "tighter_tc_stall": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Tighten torque converter stall. 0.0 = stock, 1.0 = maximum tightening. Scales converterDiameter and converterStiffness."
+            },
+            "modern_tcc_lockup": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Minimum gear for TCC lockup engagement. Lower values = earlier lockup (e.g. 2 = lock from 2nd gear). Value of 0 disables this tweak and leaves lockup behavior unchanged from donor transmission."
+            }
+          }
+        }
+      }
+    }
+  }
+}

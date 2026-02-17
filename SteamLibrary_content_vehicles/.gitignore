@@ -1,0 +1,4 @@
+# BYOBEAMS: place your own unpacked BeamNG base assets here locally. 1:1 replicate BeamNG (unpacked) vehicle asset folder structure including common/vehicles/common/<some_vehicle>>
+# Keep this folder structure in git, but ignore all imported content.
+*
+!.gitignore

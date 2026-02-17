@@ -1,0 +1,31 @@
+# Python / tooling
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.vscode/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+
+# Local runtime and debug outputs
+output/
+tmp/
+*.log
+*_debug*.txt
+parse_debug_results.txt
+
+# Ephemeral agent/work folders
+tmpclaude-*-cwd/
+tmpclaude-*-cwd
+
+# Local BeamNG source content (BYOBEAMS)
+SteamLibrary_content_vehicles/**
+!SteamLibrary_content_vehicles/.gitignore
+
+# Local donor/generated mod workspace
+mods/**
+!mods/.gitignore
+!mods/unpacked/
+!mods/unpacked/.gitignore

@@ -1,0 +1,3 @@
+# Put unpacked Automation exports here, keep them out of git.
+*
+!.gitignore

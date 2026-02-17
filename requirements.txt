@@ -1,0 +1,3 @@
+# BeamNG Engine Transplant Utility (alpha)
+# Runtime dependencies for local execution.
+# Currently standard-library only; keep file so install flow remains stable.

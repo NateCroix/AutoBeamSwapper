@@ -1,0 +1,5 @@
+# Drivetrain reports folder
+# Keep the folder structure but do not commit generated reports
+
+*
+!.gitignore
