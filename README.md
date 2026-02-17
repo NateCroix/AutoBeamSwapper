@@ -8,7 +8,9 @@ Development documentation for each module is included for those who would like t
 
 ## Credits to 
 BeamNG modding community
+
 bhowiebkr Jbeam to Json parser https://github.com/bhowiebkr
+
 FakeCarGuy Cummins engine mod (BeamNG)
 
 
