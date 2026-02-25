@@ -7,7 +7,7 @@
   "base_output_path": "M:\\BeamNG_Modding_Temp",
   "base_vehicles_path": "M:\\BeamNG_Modding_Temp\\SteamLibrary_content_vehicles",
   
-  "target_engine_file": "pickup_engine_v8_5.5.jbeam",
+  "target_engine_file": null,
   
   "solver_options": {
     "swpparam_FixMeshOffset": false,

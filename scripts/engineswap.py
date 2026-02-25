@@ -21,7 +21,7 @@ python scripts/engineswap.py <mode> <engine_jbeam_path> <target_vehicle> [option
 modes: plan, visualize, generate
 options: --show-files --show-transforms --package
 Examples:
-python scripts/engineswap.py plan "mods/unpacked/persh_crayenne_moracc/vehicles/persh_crayenne_moracc/eng_3813e/camso_engine_3813e.jbeam" pickup
+python scripts/engineswap.py visualize "mods/unpacked/persh_crayenne_moracc/vehicles/persh_crayenne_moracc/eng_3813e/camso_engine_3813e.jbeam" pickup
 python scripts/engineswap.py generate "mods/unpacked/persh_crayenne_moracc/vehicles/persh_crayenne_moracc/eng_3813e/camso_engine_3813e.jbeam" pickup --show-files --show-transforms
 python scripts/engineswap.py generate "mods/unpacked/persh_crayenne_moracc/vehicles/persh_crayenne_moracc/eng_3813e/camso_engine_3813e.jbeam" pickup --show-files --show-transforms --package
 """
@@ -5180,11 +5180,98 @@ class EngineTransplantUtility:
         Returns:
             Dictionary with categorized file lists and copy instructions
         """
-        # Get donor mod root (parent of vehicles folder)
+        # Get donor mod root (the mod package folder that contains vehicles/)
+        #
+        # SAFETY: Traversal is hard-clamped to the project directory
+        # (base_output_path from swap_parameters).  This prevents the packager
+        # from ever globbing paths outside the project — critical when the
+        # script runs on an OS drive where an escaped glob could copy system
+        # files, Recycle Bin contents, or unrelated user data.
+        #
+        # Strategy:
+        #   1. Resolve the project boundary from config (base_output_path).
+        #   2. Walk up from donor dir looking for a "vehicles/" child.
+        #   3. Stop immediately if the walk would escape the project boundary.
+        #   4. Refuse to proceed if no valid mod_root is found within bounds.
+        
         donor_dir = donor_engine_path.parent
-        mod_root = donor_dir
-        while mod_root.parent.name != "unpacked" and mod_root.parent != mod_root:
-            mod_root = mod_root.parent
+        
+        # --- Resolve project boundary ---
+        project_boundary = None
+        base_output_raw = self._swap_config.get("base_output_path")
+        if base_output_raw:
+            project_boundary = Path(base_output_raw).resolve()
+        
+        if project_boundary is None:
+            # Fallback: infer from output_path (strip mods/unpacked/*/vehicles)
+            # output_path is typically {base}/mods/unpacked/{mod}/vehicles
+            candidate = self.output_path.resolve()
+            for _ in range(4):
+                if candidate.parent != candidate:
+                    candidate = candidate.parent
+            if candidate != candidate.parent:
+                project_boundary = candidate
+            else:
+                project_boundary = self.output_path.resolve()
+            logger.warning(f"  [mod_root] base_output_path not in config; "
+                           f"inferred project boundary: {project_boundary}")
+        
+        logger.debug(f"  [mod_root] Project boundary: {project_boundary}")
+        
+        # --- Walk up from donor dir, clamped to project boundary ---
+        mod_root = donor_dir.resolve()
+        project_boundary_resolved = project_boundary.resolve()
+        
+        def _is_within_boundary(path: Path) -> bool:
+            """Check if path is equal to or a descendant of project_boundary."""
+            try:
+                path.relative_to(project_boundary_resolved)
+                return True
+            except ValueError:
+                return False
+        
+        # Primary: walk up looking for a directory that contains vehicles/
+        found = False
+        candidate = mod_root
+        while _is_within_boundary(candidate):
+            if (candidate / "vehicles").is_dir():
+                mod_root = candidate
+                found = True
+                break
+            if candidate == project_boundary_resolved:
+                break  # reached the boundary, stop
+            candidate = candidate.parent
+        
+        if not found:
+            # Fallback: scan downward from donor_dir (donor may BE inside vehicles/)
+            # Walk up only within boundary looking for any dir with vehicles/ child
+            fallback = donor_dir.resolve()
+            while _is_within_boundary(fallback):
+                if (fallback / "vehicles").is_dir():
+                    mod_root = fallback
+                    found = True
+                    break
+                if fallback == project_boundary_resolved:
+                    break
+                fallback = fallback.parent
+        
+        # --- Final validation: mod_root must be within boundary and contain vehicles/ ---
+        if not _is_within_boundary(mod_root):
+            raise RuntimeError(
+                f"SAFETY: mod_root '{mod_root}' escapes project boundary "
+                f"'{project_boundary_resolved}'. Aborting to prevent "
+                f"uncontrolled file system traversal. Check that the donor "
+                f"path is inside the project directory or adjust base_output_path."
+            )
+        
+        if not (mod_root / "vehicles").is_dir():
+            raise RuntimeError(
+                f"SAFETY: Could not locate a valid mod root (directory containing "
+                f"'vehicles/') within project boundary '{project_boundary_resolved}' "
+                f"for donor path '{donor_engine_path}'. Aborting."
+            )
+        
+        logger.info(f"  Mod root: {mod_root}")
         
         # === SLOT GRAPH MANIFEST (Primary path when available) ===
         if SLOT_GRAPH_AVAILABLE and self._slot_graph:

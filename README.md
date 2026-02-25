@@ -43,6 +43,7 @@ Transverse engine orientations and rear engine layouts are largeley untested
 - **Donor content:** unpacked donor mod with Camso/Automation-style `.jbeam` files
 - **Git:** optional but recommended
 
+
 ## Workspace model (sandbox-first)
 
 Use this project in a dedicated sandbox folder, not directly inside your BeamNG install or BeamNG user folder.
@@ -70,9 +71,15 @@ Minimum expectation (for each swap target you use):
 - `SteamLibrary_content_vehicles/common/vehicles/common/<target_vehicle>/`
 - `SteamLibrary_content_vehicles/<target_vehicle>/`
 
+## Automation / Camso Exports (Donor)
 
+Copy your unpacked Automation exports to `/mods/unpacked` or create a folder such as `/mods/donors`
 
+After you copied this over, copy the path to your donor `*engine.jbeam` file and provide that when running the script:
 
+```powershell
+python scripts/engineswap.py generate "mods/unpacked/exportname/vehicles/exportname/eng_1234a/camso_engine_1234a.jbeam" <target> <options>
+```
 
 
 ## Dependencies
@@ -139,17 +146,26 @@ If you prefer global Python, skip venv activation and use your system `python`.
 pip install -r requirements.txt
 ```
 
+### 3) Copy unpacked BeamNG assets and Automation donor files
 
-### 3) Configure swap parameters
+ - populate `SteamLibrary_content_vehicles/` with unpacked BeamNG vehicle content
+ - populate Automation exports folder (`/mods/unpacked` or a created folder such as `/mods/donors`) with unpacked Automation export content
+
+
+### 4) Configure swap parameters
+
+readme at `docs\swap_parameter_readme.md`
 
 Open and adjust:
 
 - `configs/swap_parameters.json`
-- path settings
+- configure path settings
 - solver/swap behavior used by your scenario
+- mounts / offsets (Camso engines often sit unnaturally low in the vehicle)
+- any desired powertrain tweaks
 
 
-### 4) Run your first generate command (pickup)
+### 5) Run your first generate command (pickup)
 
 ```powershell
 python scripts/engineswap.py generate "path/to/camso_engine_12345.jbeam" pickup --show-files --show-transforms --package
@@ -164,7 +180,7 @@ Expected result:
 If you change donor/target combinations, revisit `configs/swap_parameters.json` first.
 
 
-### 5) Copy to BeamNG manually
+### 6) Copy to BeamNG manually
 
 Treat this project folder as a build sandbox; deployment into the game is a separate manual step.
 
@@ -173,7 +189,7 @@ After validating output, copy the generated "modname" folder (default = "engines
 Activating/deactivating mods in BeamNG mods UI tracks all swaps within "modname" folder. If you want seperation between different generations of swaps, use different "modname" (configure in swap_parameters.json)
 
 
-### 6) If the swap doesn't work, welcome to the team. JK use 
+### 7) If the swap doesn't work, welcome to the team. JK use 
 
 ```powershell
 python scripts/analyze_powertrains.py -v pickup
